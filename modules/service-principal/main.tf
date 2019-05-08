@@ -2,9 +2,13 @@ terraform {
     backend "azurerm" {}
 }
 
+data "azurerm_resource_group" "kv" {
+  name    = "${var.vault_resource_group_name}"
+}
+
 data "azurerm_key_vault" "deployment" {
-  name                = "pi-${var.env_shorthand}-kv"
-  resource_group_name = "pi-vaults-rg"
+  name                = "${var.key_vault_name}"
+  resource_group_name = "${data.azurerm_resource_group.kv.name}"
 }
 
 resource "azurerm_azuread_application" "deployment" {
@@ -18,5 +22,5 @@ resource "azurerm_azuread_service_principal" "deployment" {
 resource "azurerm_azuread_service_principal_password" "deployment" {
   service_principal_id  = "${azurerm_azuread_service_principal.deployment.id}"
   value                 = "${data.azurerm_key_vault_secret.deployment.value}"
-  end_date              = "2020-01-01T00:00:00Z"
+  end_date              = "${var.password_expiration_date}"
 }

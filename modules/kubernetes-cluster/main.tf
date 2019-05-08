@@ -6,13 +6,17 @@ data "azurerm_resource_group" "deployment" {
   name    = "${var.resource_group_name}"
 }
 
+data "azurerm_resource_group" "kv" {
+  name    = "${var.vault_resource_group_name}"
+}
+
 data "azurerm_key_vault" "deployment" {
-  name                = "pi-${var.env_shorthand}-kv"
-  resource_group_name = "pi-vaults-rg"
+  name                = "${var.key_vault_name}"
+  resource_group_name = "${data.azurerm_resource_group.kv.name}"
 }
 
 data "azurerm_key_vault_secret" "deployment" {
-  name      = "aks-deployment-client-secret"
+  name      = "${var.aks_deployment_secret_name}"
   vault_uri = "${data.azurerm_key_vault.deployment.vault_uri}"
 }
 
